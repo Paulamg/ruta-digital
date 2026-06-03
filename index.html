@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruta Digital — Diagnóstico</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0A0A0A;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #FF4D1C;
+    --accent2: #FF8C5A;
+    --text: #F5F0E8;
+    --text-muted: #E8E0D0;
+    --text-dim: #BBAA99;
+    --success: #2ECC71;
+    --radius: 12px;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* LAYOUT */
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 32px 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .lang-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .lang-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    margin-bottom: 32px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #E8E0D0;
+  }
+  .progress-count {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .q-hint {
+    font-size: 13px;
+    color: #FFD580;
+    margin-bottom: 24px;
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+  }
+  .option:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(255, 77, 28, 0.08);
+    color: var(--text);
+  }
+  .option-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .option.selected .option-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .option.selected .option-check::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  /* CHECKBOX OPTIONS (multi) */
+  .option .option-check.square {
+    border-radius: 4px;
+  }
+  .option.disabled-opt {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .option.selected .option-check.square::after {
+    content: '✓';
+    font-size: 10px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* TEXT INPUT */
+  .text-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .text-input:focus {
+    border-color: var(--accent);
+  }
+  .text-input::placeholder {
+    color: var(--text-dim);
+  }
+
+  /* NAVIGATION */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: #E8E0D0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-back:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .btn-next {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+  .btn-next:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-next:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* INTRO SCREEN */
+  .intro {
+    padding-top: 40px;
+    animation: slideIn 0.4s ease;
+  }
+  .intro-tag {
+    display: inline-block;
+    background: rgba(255,77,28,0.12);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .intro h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .intro h1 em {
+    color: var(--accent);
+    font-style: normal;
+  }
+  .intro p {
+    font-size: 16px;
+    color: #E8E0D0;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 480px;
+  }
+  .intro-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    flex: 1;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: #E8E0D0;
+    margin-top: 2px;
+  }
+  .btn-start {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 16px 36px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .btn-start:hover { background: var(--accent2); transform: translateY(-2px); }
+
+  /* LOADING */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    animation: slideIn 0.4s ease;
+  }
+  .loading-icon {
+    width: 56px;
+    height: 56px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .loading p { font-size: 14px; color: var(--text-muted); }
+
+  /* RESULT */
+  .result {
+    animation: slideIn 0.4s ease;
+  }
+  .result-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .level-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+  .level-bajo { background: rgba(255,77,28,0.15); color: #FF4D1C; border: 1px solid rgba(255,77,28,0.3); }
+  .level-medio { background: rgba(255,193,28,0.15); color: #FFC11C; border: 1px solid rgba(255,193,28,0.3); }
+  .level-alto { background: rgba(46,204,113,0.15); color: #2ECC71; border: 1px solid rgba(46,204,113,0.3); }
+
+  .result-header-text h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .result-header-text p { font-size: 14px; color: #E8E0D0; }
+
+  .result-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.9;
+    color: #F0EAE0;
+  }
+  .result-body strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .phase2-block {
+    background: rgba(255,77,28,0.05);
+    border: 1px solid rgba(255,77,28,0.15);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+  .phase2-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+    line-height: 1.6;
+    color: #CCC;
+  }
+  .phase2-item:last-child { border-bottom: none; }
+  .phase2-emoji { font-size: 18px; flex-shrink: 0; padding-top: 1px; }
+  .result-body h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 20px 0 8px;
+  }
+  .result-body h3:first-child { margin-top: 0; }
+
+  .result-cta {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+  .result-cta h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .result-cta p { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 16px; }
+  .btn-cta {
+    background: #fff;
+    color: var(--accent);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cta:hover { transform: translateY(-1px); }
+
+  /* TRIANGLE DISPLAY */
+  .triangle-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .triangle-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .triangle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .tri-vertex {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .tri-icon {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: var(--accent);
+  }
+  .tri-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #F5F0E8;
+    margin-bottom: 8px;
+  }
+  .tri-state {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  .state-low { background: rgba(255,77,28,0.15); color: #FF4D1C; }
+  .state-mid { background: rgba(255,193,28,0.15); color: #FFC11C; }
+  .state-high { background: rgba(46,204,113,0.15); color: #2ECC71; }
+
+  .btn-restart {
+    width: 100%;
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 12px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-restart:hover { border-color: var(--text-muted); color: var(--text); }
+
+  @media (max-width: 480px) {
+    .intro h1 { font-size: 30px; }
+    .q-text { font-size: 18px; }
+    .intro-stats { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">RUTA <span>DIGITAL</span></div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('es')" id="btn-es">ES</button>
+      <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+    </div>
+  </div>
+
+  <div id="screen"></div>
+</div>
+
+<script>
+const T = {
+  es: {
+    progress: "Pregunta",
+    of: "de",
+    back: "← Atrás",
+    next: "Continuar →",
+    submit: "Ver mi diagnóstico →",
+    intro_tag: "Diagnóstico gratuito",
+    intro_h1: "Descubre en qué punto\nestá tu <em>negocio digital</em>",
+    intro_p: "Responde 17 preguntas y recibe un diagnóstico personalizado con tu nivel de digitalización y los pasos exactos que debes dar primero.",
+    stat1_num: "17", stat1_label: "preguntas",
+    stat2_num: "3 min", stat2_label: "tiempo promedio",
+    stat3_num: "100%", stat3_label: "gratis",
+    start: "Empezar diagnóstico →",
+    loading_h: "Analizando tu negocio...",
+    loading_p: "Estamos generando tu diagnóstico personalizado",
+    result_cta_h: "¿Listo para recorrer tu Ruta Digital?",
+    result_cta_p: "Agenda una sesión gratuita y definamos juntos el plan para tu negocio.",
+    result_cta_btn: "Agendar sesión gratuita",
+    restart: "Hacer el diagnóstico de otro negocio",
+    nivel: "Nivel",
+  },
+  en: {
+    progress: "Question",
+    of: "of",
+    back: "← Back",
+    next: "Continue →",
+    submit: "See my diagnosis →",
+    intro_tag: "Free diagnosis",
+    intro_h1: "Find out where your\n<em>digital business</em> stands",
+    intro_p: "Answer 17 questions and receive a personalized diagnosis with your digitalization level and the exact steps you should take first.",
+    stat1_num: "17", stat1_label: "questions",
+    stat2_num: "3 min", stat2_label: "average time",
+    stat3_num: "100%", stat3_label: "free",
+    start: "Start diagnosis →",
+    loading_h: "Analyzing your business...",
+    loading_p: "We're generating your personalized diagnosis",
+    result_cta_h: "Ready to walk your Digital Route?",
+    result_cta_p: "Book a free session and let's define the plan for your business together.",
+    result_cta_btn: "Book free session",
+    restart: "Diagnose another business",
+    nivel: "Level",
+  }
+};
+
+const questions = {
+  es: [
+    { id: "nombre", type: "text", q: "¿Cuál es tu nombre y el nombre de tu negocio?", hint: "Ej: María López — Tienda Floral", placeholder: "Tu nombre — Nombre del negocio" },
+    { id: "sector", type: "single", q: "¿A qué sector pertenece tu negocio?", options: ["Moda / Belleza / Bienestar","Alimentos y bebidas","Turismo / Experiencias","Educación / Formación","Tecnología / Software","Salud","Comercio / Retail","Servicios profesionales","Otro"] },
+    { id: "tipo_venta", type: "single", q: "¿Qué vendes?", options: ["Productos físicos","Servicios","Infoproductos / cursos digitales","Productos físicos + Servicios","Todo lo anterior"] },
+    { id: "equipo", type: "single", q: "¿Cuántas personas trabajan en tu negocio?", options: ["Solo yo","1–2 personas","3–5 personas","Más de 5"] },
+    { id: "ingresos", type: "single", q: "¿Cuánto factura tu negocio al mes aproximadamente?", options: ["Menos de $500 USD","$500 – $1,000 USD","$1,000 – $5,000 USD","$5,000 – $10,000 USD","Más de $10,000 USD"] },
+    { id: "clientes", type: "single", q: "¿Cómo llegan actualmente tus clientes?", options: ["Referidos / voz a voz","Redes sociales orgánicas","Publicidad pagada (ads)","Sede física","Combinación de varios"] },
+    { id: "vende_online", type: "single", q: "¿Tu negocio vende online actualmente?", options: ["Sí, tenemos un sistema claro de ventas online","Algo, pero no está bien estructurado","No, todas las ventas son presenciales o por WhatsApp","Estamos en proceso de montarlo"] },
+    { id: "canales", type: "multi", q: "¿En qué canales digitales tienes presencia activa?", hint: "Selecciona todos los que apliquen", options: ["Instagram","Facebook","TikTok","YouTube","LinkedIn","Pinterest","Página web","WhatsApp Business","Ninguno"] },
+    { id: "seguidores", type: "single", q: "¿Cuántos seguidores tiene tu red social principal?", options: ["Menos de 500","500 – 2,000","2,000 – 10,000","10,000 – 50,000","50,000 – 200,000","Más de 200,000"] },
+    { id: "pauta", type: "single", q: "¿Estás realizando pauta paga actualmente?", options: ["Sí, de forma constante y con estrategia clara","Sí, pero sin una estrategia definida","Lo he hecho antes pero no actualmente","No, nunca he pautado"] },
+    { id: "contenido_video", type: "single", q: "¿Grabas contenido de video para tus redes?", options: ["Sí, regularmente (reels, tiktoks, lives)","Ocasionalmente","No, solo imágenes o texto","Quiero empezar pero no sé cómo"] },
+    { id: "automatizacion", type: "single", q: "¿Tienes algún sistema de automatización para atender clientes?", options: ["Sí, tengo respuestas automáticas y flujos configurados","Tengo WhatsApp Business pero sin configurar bien","Solo respondo manualmente","No tengo nada automatizado"] },
+    { id: "ia", type: "single", q: "¿Usas herramientas de inteligencia artificial en tu negocio?", options: ["Sí, las uso regularmente para contenido, atención o procesos","Las he probado pero no las uso de forma constante","No las uso","No sé cuáles usar"] },
+    { id: "equipo_digital", type: "single", q: "¿Quién maneja lo digital en tu negocio actualmente?", options: ["Yo solo/a, no tengo equipo","Tengo alguien interno encargado","Trabajo con una agencia o freelancer","Tenemos equipo interno + apoyo externo"] },
+    { id: "ventas_consistentes", type: "single", q: "¿Tu negocio genera ventas digitales de forma consistente?", options: ["Sí, regularmente y de forma predecible","Sí, pero son irregulares — unos meses bien, otros no","Ocasionalmente, no es algo constante","No, aún no hemos logrado ventas digitales"] },
+    { id: "reto", type: "multi", max: 3, q: "¿Cuáles son tus mayores retos digitales hoy?", hint: "Selecciona máximo 3", options: ["No sé cómo atraer clientes por internet","Publico pero no genero ventas","No tengo una estrategia de contenido consistente","Me faltan formatos — carruseles, blogs, videos largos","No tengo tiempo para producir contenido","No tengo una estrategia de pauta clara","Mi presencia digital no se ve profesional","No sé cómo automatizar mi negocio","Tengo clientes pero no logro escalar","He invertido en agencias o freelancers sin ver resultados","No tengo una estrategia clara de ningún tipo"] },
+    { id: "objetivo", type: "single", q: "¿Qué quieres lograr en los próximos 6 meses?", options: ["Vender más por internet","Conseguir clientes nuevos de forma constante","Automatizar mi negocio para tener más tiempo","Lanzar mi negocio online desde cero","Escalar lo que ya tengo"] },
+  ],
+  en: [
+    { id: "nombre", type: "text", q: "What's your name and the name of your business?", hint: "E.g.: Maria Lopez — Floral Shop", placeholder: "Your name — Business name" },
+    { id: "sector", type: "single", q: "What sector does your business belong to?", options: ["Fashion / Beauty / Wellness","Food & beverage","Tourism / Experiences","Education / Training","Technology / Software","Health","Commerce / Retail","Professional services","Other"] },
+    { id: "tipo_venta", type: "single", q: "What do you sell?", options: ["Physical products","Services","Infoproducts / digital courses","Physical products + Services","All of the above"] },
+    { id: "equipo", type: "single", q: "How many people work in your business?", options: ["Just me","1–2 people","3–5 people","More than 5"] },
+    { id: "ingresos", type: "single", q: "Approximately how much does your business bill per month?", options: ["Less than $500 USD","$500 – $1,000 USD","$1,000 – $5,000 USD","$5,000 – $10,000 USD","More than $10,000 USD"] },
+    { id: "clientes", type: "single", q: "How do your clients currently find you?", options: ["Referrals / word of mouth","Organic social media","Paid advertising (ads)","Physical location","Combination of several"] },
+    { id: "vende_online", type: "single", q: "Does your business currently sell online?", options: ["Yes, we have a clear online sales system","Sort of, but it's not well structured","No, all sales are in person or via WhatsApp","We're in the process of setting it up"] },
+    { id: "canales", type: "multi", q: "Which digital channels do you have an active presence on?", hint: "Select all that apply", options: ["Instagram","Facebook","TikTok","YouTube","LinkedIn","Pinterest","Website","WhatsApp Business","None"] },
+    { id: "seguidores", type: "single", q: "How many followers does your main social network have?", options: ["Less than 500","500 – 2,000","2,000 – 10,000","10,000 – 50,000","50,000 – 200,000","More than 200,000"] },
+    { id: "pauta", type: "single", q: "Are you currently running paid advertising?", options: ["Yes, consistently and with a clear strategy","Yes, but without a defined strategy","I've done it before but not currently","No, I've never run paid ads"] },
+    { id: "contenido_video", type: "single", q: "Do you record video content for your social media?", options: ["Yes, regularly (reels, tiktoks, lives)","Occasionally","No, only images or text","I want to start but don't know how"] },
+    { id: "automatizacion", type: "single", q: "Do you have any automation system to serve clients?", options: ["Yes, I have automatic replies and configured flows","I have WhatsApp Business but not well set up","I only respond manually","I have nothing automated"] },
+    { id: "ia", type: "single", q: "Do you use artificial intelligence tools in your business?", options: ["Yes, I use them regularly for content, service or processes","I've tried them but don't use them consistently","I don't use them","I don't know which ones to use"] },
+    { id: "equipo_digital", type: "single", q: "¿Quién maneja lo digital en tu negocio actualmente?", options: ["Yo solo/a, no tengo equipo","Tengo alguien interno encargado","Trabajo con una agencia o freelancer","Tenemos equipo interno + apoyo externo"] },
+    { id: "equipo_digital", type: "single", q: "Who currently manages the digital side of your business?", options: ["Just me, I have no team","I have someone internal in charge","I work with an agency or freelancer","We have an internal team + external support"] },
+    { id: "ventas_consistentes", type: "single", q: "Does your business generate digital sales consistently?", options: ["Yes, regularly and predictably","Yes, but irregularly — some months good, some not","Occasionally, it's not consistent","No, we haven't achieved digital sales yet"] },
+    { id: "reto", type: "multi", max: 3, q: "What are your biggest digital challenges today?", hint: "Select up to 3", options: ["I don't know how to attract clients online","I post but don't generate sales","I don't have a consistent content strategy","I'm missing formats — carousels, blogs, long videos","I don't have time to produce content","I don't have a clear paid advertising strategy","My digital presence doesn't look professional","I don't know how to automate my business","I have clients but can't scale","I've invested in agencies or freelancers without results","I don't have a clear strategy at all"] },
+    { id: "objetivo", type: "single", q: "What do you want to achieve in the next 6 months?", options: ["Sell more online","Get new clients consistently","Automate my business to have more time","Launch my online business from scratch","Scale what I already have"] },
+  ]
+};
+
+let lang = 'es';
+let step = -1; // -1 = intro
+let answers = {};
+let multiSelected = {};
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-es').classList.toggle('active', l === 'es');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  if (step === -1) renderIntro();
+  else if (step >= 0 && step < questions[lang].length) renderQuestion();
+}
+
+function t(key) { return T[lang][key]; }
+function qs() { return questions[lang]; }
+
+function renderIntro() {
+  const s = document.getElementById('screen');
+  s.innerHTML = `
+    <div class="intro">
+      <div class="intro-tag">${t('intro_tag')}</div>
+      <h1>${t('intro_h1').replace(/\n/g, '<br>')}</h1>
+      <p>${t('intro_p')}</p>
+      <div class="intro-stats">
+        <div class="stat"><div class="stat-num">${t('stat1_num')}</div><div class="stat-label">${t('stat1_label')}</div></div>
+        <div class="stat"><div class="stat-num">${t('stat2_num')}</div><div class="stat-label">${t('stat2_label')}</div></div>
+        <div class="stat"><div class="stat-num">${t('stat3_num')}</div><div class="stat-label">${t('stat3_label')}</div></div>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">${t('start')}</button>
+    </div>
+  `;
+}
+
+function startQuiz() {
+  step = 0;
+  answers = {};
+  multiSelected = {};
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = qs()[step];
+  const total = qs().length;
+  const pct = Math.round((step / total) * 100);
+  const currentAnswer = answers[q.id];
+  const currentMulti = multiSelected[q.id] || [];
+
+  let optionsHtml = '';
+  if (q.type === 'text') {
+    optionsHtml = `<input class="text-input" type="text" id="text-input" placeholder="${q.placeholder || ''}" value="${currentAnswer || ''}" oninput="answers['${q.id}'] = this.value; updateNext()">`;
+  } else if (q.type === 'single') {
+    optionsHtml = `<div class="options">` + q.options.map((opt, i) => `
+      <button class="option ${currentAnswer === opt ? 'selected' : ''}" onclick="selectOption('${q.id}', '${opt.replace(/'/g,"\\'")}', false)">
+        <div class="option-check"></div>
+        <span>${opt}</span>
+      </button>
+    `).join('') + `</div>`;
+  } else if (q.type === 'multi') {
+    const maxSel = q.max || 99;
+    optionsHtml = `<div class="options">` + q.options.map((opt, i) => {
+      const isSelected = currentMulti.includes(opt);
+      const isDisabled = !isSelected && currentMulti.length >= maxSel;
+      return `<button class="option ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled-opt' : ''}" onclick="selectMulti('${q.id}', '${opt.replace(/'/g,"\\'")}')">
+        <div class="option-check square"></div>
+        <span>${opt}</span>
+      </button>`;
+    }).join('') + `</div>`;
+  }
+
+  const isLast = step === total - 1;
+  const hasAnswer = q.type === 'multi' ? currentMulti.length > 0 : !!currentAnswer;
+
+  document.getElementById('screen').innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">${t('progress')} ${step + 1} ${t('of')} ${total}</span>
+        <span class="progress-count">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="question-card">
+      <div class="q-number">${String(step + 1).padStart(2, '0')}</div>
+      <div class="q-text">${q.q}</div>
+      ${q.hint ? `<div class="q-hint">${q.hint}</div>` : ''}
+      ${optionsHtml}
+      <div class="nav">
+        ${step > 0 ? `<button class="btn-back" onclick="goBack()">${t('back')}</button>` : '<div></div>'}
+        <button class="btn-next" id="btn-next" onclick="goNext()" ${hasAnswer ? '' : 'disabled'}>${isLast ? t('submit') : t('next')}</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectOption(id, value, multi) {
+  answers[id] = value;
+  goNext();
+}
+
+function selectMulti(id, value) {
+  if (!multiSelected[id]) multiSelected[id] = [];
+  const idx = multiSelected[id].indexOf(value);
+  const q = qs()[step];
+  const maxSelect = q.max || 99;
+  if (idx === -1) {
+    if (multiSelected[id].length >= maxSelect) return; // enforce max
+    multiSelected[id].push(value);
+  } else {
+    multiSelected[id].splice(idx, 1);
+  }
+  answers[id] = multiSelected[id].join(', ');
+  renderQuestion();
+}
+
+function updateNext() {
+  const q = qs()[step];
+  const btn = document.getElementById('btn-next');
+  if (btn) btn.disabled = !answers[q.id];
+}
+
+function goNext() {
+  const total = qs().length;
+  if (step < total - 1) {
+    step++;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  } else {
+    submitQuiz();
+  }
+}
+
+function goBack() {
+  if (step > 0) { step--; renderQuestion(); window.scrollTo(0, 0); }
+  else { step = -1; renderIntro(); }
+}
+
+async function submitQuiz() {
+  document.getElementById('screen').innerHTML = `
+    <div class="loading">
+      <div class="loading-icon"></div>
+      <h2>${t('loading_h')}</h2>
+      <p>${t('loading_p')}</p>
+    </div>
+  `;
+
+  const summaryLines = qs().map(q => `${q.q}: ${answers[q.id] || 'N/A'}`).join('\n');
+
+  const systemPrompt = lang === 'es'
+    ? `Eres un consultor experto en digitalización de negocios de la metodología "Ruta Digital". Esta metodología se basa en un marco llamado El Triángulo Digital, que evalúa tres vértices que deben funcionar en sincronía para que un negocio venda online: RUTA (el camino completo del cliente desde que descubre el negocio hasta que compra), MENSAJE (qué comunica en cada punto de contacto y si convierte) y OFERTA (qué vende, cómo lo muestra y qué tan fácil es comprar). Los tres siempre necesitan revisión porque un triángulo no se sostiene si uno falla. Genera el diagnóstico con esta estructura exacta: NIVEL DE DIGITALIZACIÓN (Bajo, Medio o Alto con una oración de justificación). EL TRIÁNGULO DIGITAL DE TU NEGOCIO con tres subsecciones: RUTA con su estado (Rota, Parcial u Optimizada) y 2-3 oraciones específicas; MENSAJE con su estado (Confuso, Inconsistente o Claro) y 2-3 oraciones específicas; OFERTA con su estado (Incompleta, Desorganizada o Bien estructurada) y 2-3 oraciones específicas. LO QUE DEBES OPTIMIZAR EN LA FASE 2: presenta esta sección de forma visual y fácil de leer. Usa emojis relevantes, ideas cortas separadas en líneas, y listas simples. Estructura así: una oración introductoria motivadora, luego entre 3 y 5 puntos de acción concretos cada uno con un emoji distinto y máximo 2 líneas de explicación, y termina con una frase corta que genere urgencia sin sonar a venta forzada. Sé específico con los datos que el usuario dio. Tono directo, cálido, profesional. Máximo 400 palabras en total.`
+    : `You are an expert business digitalization consultant for the "Digital Route" methodology. This methodology is based on a framework called The Digital Triangle, which evaluates three vertices that must work in sync: ROUTE (the complete customer journey from discovery to purchase), MESSAGE (what the business communicates at each touchpoint and whether it converts) and OFFER (what they sell, how they show it and how easy it is to buy). All three always need review because a triangle cannot stand if one fails. Generate the diagnosis with this exact structure: DIGITALIZATION LEVEL (Low, Medium or High with one sentence of justification). YOUR BUSINESS'S DIGITAL TRIANGLE with three subsections: ROUTE with its state (Broken, Partial or Optimized) and 2-3 specific sentences; MESSAGE with its state (Confused, Inconsistent or Clear) and 2-3 specific sentences; OFFER with its state (Incomplete, Disorganized or Well structured) and 2-3 specific sentences. WHAT YOU NEED TO OPTIMIZE IN PHASE 2: present this section in a visual and easy-to-read format. Use relevant emojis, short ideas separated in lines, and simple lists. Structure it like this: one motivating introductory sentence, then 3 to 5 concrete action points each with a different emoji and maximum 2 lines of explanation, and end with a short sentence that creates urgency without sounding like a forced sales pitch. Be specific with the data the user provided. Tone: direct, warm, professional. Maximum 400 words total.`;
+
+  try {
+    const response = await fetch("/api/diagnose", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: [{ role: "user", content: `Aquí están las respuestas del quiz:\n\n${summaryLines}` }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+
+    // Send data to Make webhook
+    const level = text.toLowerCase().includes('alto') || text.toLowerCase().includes('high') ? (lang === 'es' ? 'Alto' : 'High') :
+                  text.toLowerCase().includes('medio') || text.toLowerCase().includes('medium') ? (lang === 'es' ? 'Medio' : 'Medium') :
+                  (lang === 'es' ? 'Bajo' : 'Low');
+
+    try {
+      await fetch('https://hook.us1.make.com/vsczi9wa8ya3dyra6nkqo1n72nbu4dup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+          idioma: lang.toUpperCase(),
+          nombre: answers['nombre'] || '',
+          sector: answers['sector'] || '',
+          tipo_venta: answers['tipo_venta'] || '',
+          equipo: answers['equipo'] || '',
+          ingresos: answers['ingresos'] || '',
+          como_llegan_clientes: answers['clientes'] || '',
+          vende_online: answers['vende_online'] || '',
+          canales: answers['canales'] || '',
+          seguidores: answers['seguidores'] || '',
+          graba_video: answers['contenido_video'] || '',
+          equipo_digital: answers['equipo_digital'] || '',
+          ventas_consistentes: answers['ventas_consistentes'] || '',
+          automatizacion: answers['automatizacion'] || '',
+          usa_ia: answers['ia'] || '',
+          pauta: answers['pauta'] || '',
+          retos: answers['reto'] || '',
+          objetivo: answers['objetivo'] || '',
+          nivel: level
+        })
+      });
+    } catch(e) {
+      // Silently fail — don't interrupt user experience
+    }
+
+    renderResult(text);
+  } catch (e) {
+    renderResult(lang === 'es'
+      ? "Hubo un error al generar tu diagnóstico. Por favor intenta de nuevo."
+      : "There was an error generating your diagnosis. Please try again.");
+  }
+}
+
+function renderResult(text) {
+  // Detect level
+  let levelClass = 'level-bajo';
+  let levelText = lang === 'es' ? 'BAJO' : 'LOW';
+  const lower = text.toLowerCase();
+  if (lower.includes('alto') && (lower.includes('nivel') || lower.includes('level'))) {
+    levelClass = 'level-alto'; levelText = lang === 'es' ? 'ALTO' : 'HIGH';
+  } else if (lower.includes('medio') || lower.includes('medium')) {
+    levelClass = 'level-medio'; levelText = lang === 'es' ? 'MEDIO' : 'MEDIUM';
+  }
+
+  // Detect triangle states
+  function detectState(keyword, states) {
+    for (const [label, cssClass] of states) {
+      if (lower.includes(label.toLowerCase())) return { label, cssClass };
+    }
+    return states[0];
+  }
+
+  const rutaStates = lang === 'es'
+    ? [['Parcial', 'state-mid'], ['Rota', 'state-low'], ['Optimizada', 'state-high']]
+    : [['Partial', 'state-mid'], ['Broken', 'state-low'], ['Optimized', 'state-high']];
+  const msgStates = lang === 'es'
+    ? [['Inconsistente', 'state-mid'], ['Confuso', 'state-low'], ['Claro', 'state-high']]
+    : [['Inconsistent', 'state-mid'], ['Confused', 'state-low'], ['Clear', 'state-high']];
+  const ofertaStates = lang === 'es'
+    ? [['Desorganizada', 'state-mid'], ['Incompleta', 'state-low'], ['Bien estructurada', 'state-high']]
+    : [['Disorganized', 'state-mid'], ['Incomplete', 'state-low'], ['Well structured', 'state-high']];
+
+  const rutaState = detectState('ruta', rutaStates);
+  const msgState = detectState('mensaje', msgStates);
+  const ofertaState = detectState('oferta', ofertaStates);
+
+  // Format text
+  const formatted = text
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>')
+    .replace(/—\s*(RUTA|MENSAJE|OFERTA|ROUTE|MESSAGE|OFFER)[:\s]*/gi, '<h3>$1</h3>')
+    .replace(/(NIVEL DE DIGITALIZACIÓN|DIGITALIZATION LEVEL)[:\s]*(Bajo|Medio|Alto|Low|Medium|High)?/gi, '<h3>$1</h3>')
+    .replace(/(EL TRIÁNGULO DIGITAL DE TU NEGOCIO|YOUR BUSINESS\'S DIGITAL TRIANGLE)[:\s]*/gi, '<h3>$1</h3>')
+    .replace(/(LO QUE DEBES OPTIMIZAR EN LA FASE 2|WHAT YOU NEED TO OPTIMIZE IN PHASE 2)[:\s]*/gi, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  const businessName = answers['nombre'] ? answers['nombre'].split('—')[1]?.trim() || answers['nombre'].split('-')[1]?.trim() || answers['nombre'] : '';
+
+  document.getElementById('screen').innerHTML = `
+    <div class="result">
+      <div class="result-header">
+        <div class="level-badge ${levelClass}">${t('nivel')}<br>${levelText}</div>
+        <div class="result-header-text">
+          <h2>${lang === 'es' ? 'Tu diagnóstico está listo' : 'Your diagnosis is ready'}${businessName ? ` — ${businessName}` : ''}</h2>
+          <p>${lang === 'es' ? 'Basado en tus respuestas, esto es lo que encontramos:' : 'Based on your answers, here is what we found:'}</p>
+        </div>
+      </div>
+
+      <div class="triangle-wrap">
+        <div class="triangle-label">${lang === 'es' ? 'El Triángulo Digital' : 'The Digital Triangle'}</div>
+        <div class="triangle-grid">
+          <div class="tri-vertex">
+            <div class="tri-icon">⟶</div>
+            <div class="tri-name">${lang === 'es' ? 'RUTA' : 'ROUTE'}</div>
+            <div class="tri-state ${rutaState.cssClass}">${rutaState.label}</div>
+          </div>
+          <div class="tri-vertex">
+            <div class="tri-icon">◎</div>
+            <div class="tri-name">${lang === 'es' ? 'MENSAJE' : 'MESSAGE'}</div>
+            <div class="tri-state ${msgState.cssClass}">${msgState.label}</div>
+          </div>
+          <div class="tri-vertex">
+            <div class="tri-icon">◈</div>
+            <div class="tri-name">${lang === 'es' ? 'OFERTA' : 'OFFER'}</div>
+            <div class="tri-state ${ofertaState.cssClass}">${ofertaState.label}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-body">${formatted}</div>
+      <button class="btn-restart" onclick="restartQuiz()">${t('restart')}</button>
+    </div>
+  `;
+}
+
+function restartQuiz() {
+  step = -1;
+  answers = {};
+  multiSelected = {};
+  renderIntro();
+  window.scrollTo(0, 0);
+}
+
+// Init
+renderIntro();
+</script>
+</body>
+</html>
