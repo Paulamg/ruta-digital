@@ -576,6 +576,39 @@
   }
   .btn-restart:hover { border-color: var(--text-muted); color: var(--text); }
 
+  @media print {
+    .header, .btn-restart, .btn-download { display: none !important; }
+    body { background: white !important; color: black !important; }
+    .app { padding: 0 !important; }
+    .result-header { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+    .triangle-wrap { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+    .tri-vertex { background: #eee !important; border: 1px solid #ddd !important; }
+    .result-body { background: #f9f9f9 !important; border: 1px solid #ddd !important; color: #222 !important; }
+    .level-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tri-state { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .result-body h3 { color: #FF4D1C !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  .btn-download {
+    width: 100%;
+    margin-top: 12px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 13px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-download:hover { background: rgba(255,77,28,0.08); }
+
   @media (max-width: 480px) {
     .intro h1 { font-size: 30px; }
     .q-text { font-size: 18px; }
@@ -1030,9 +1063,20 @@ function renderResult(text) {
       </div>
 
       <div class="result-body">${formatted}</div>
+      <button class="btn-download" onclick="downloadPDF()">
+        📄 ${lang === 'es' ? 'Descargar diagnóstico en PDF' : 'Download diagnosis as PDF'}
+      </button>
       <button class="btn-restart" onclick="restartQuiz()">${t('restart')}</button>
     </div>
   `;
+}
+
+function downloadPDF() {
+  const businessName = answers['nombre'] ? answers['nombre'].split('—')[1]?.trim() || answers['nombre'].split('-')[1]?.trim() || answers['nombre'] : 'Diagnostico';
+  const originalTitle = document.title;
+  document.title = `Ruta Digital — Diagnostico ${businessName}`;
+  window.print();
+  document.title = originalTitle;
 }
 
 function restartQuiz() {
