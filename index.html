@@ -623,7 +623,7 @@ const questions = {
   es: [
     { id: "nombre", type: "text", q: "¿Cuál es tu nombre y el nombre de tu negocio?", hint: "Ej: María López — Tienda Floral", placeholder: "Tu nombre — Nombre del negocio" },
     { id: "sector", type: "single", q: "¿A qué sector pertenece tu negocio?", options: ["Moda / Belleza / Bienestar","Alimentos y bebidas","Turismo / Experiencias","Educación / Formación","Tecnología / Software","Salud","Comercio / Retail","Servicios profesionales","Otro"] },
-    { id: "tipo_venta", type: "single", q: "¿Qué vendes?", options: ["Productos físicos","Servicios","Infoproductos / cursos digitales","Productos físicos + Servicios","Todo lo anterior"] },
+    { id: "tipo_venta", type: "multi", q: "¿Qué vendes?", hint: "Selecciona todos los que apliquen", options: ["Productos físicos","Servicios","Infoproductos / cursos digitales","Experiencias / eventos"] },
     { id: "equipo", type: "single", q: "¿Cuántas personas trabajan en tu negocio?", options: ["Solo yo","1–2 personas","3–5 personas","Más de 5"] },
     { id: "ingresos", type: "single", q: "¿Cuánto factura tu negocio al mes aproximadamente?", options: ["Menos de $500 USD","$500 – $1,000 USD","$1,000 – $5,000 USD","$5,000 – $10,000 USD","Más de $10,000 USD"] },
     { id: "clientes", type: "single", q: "¿Cómo llegan actualmente tus clientes?", options: ["Referidos / voz a voz","Redes sociales orgánicas","Publicidad pagada (ads)","Sede física","Combinación de varios"] },
@@ -642,7 +642,7 @@ const questions = {
   en: [
     { id: "nombre", type: "text", q: "What's your name and the name of your business?", hint: "E.g.: Maria Lopez — Floral Shop", placeholder: "Your name — Business name" },
     { id: "sector", type: "single", q: "What sector does your business belong to?", options: ["Fashion / Beauty / Wellness","Food & beverage","Tourism / Experiences","Education / Training","Technology / Software","Health","Commerce / Retail","Professional services","Other"] },
-    { id: "tipo_venta", type: "single", q: "What do you sell?", options: ["Physical products","Services","Infoproducts / digital courses","Physical products + Services","All of the above"] },
+    { id: "tipo_venta", type: "multi", q: "What do you sell?", hint: "Select all that apply", options: ["Physical products","Services","Infoproducts / digital courses","Experiences / events"] },
     { id: "equipo", type: "single", q: "How many people work in your business?", options: ["Just me","1–2 people","3–5 people","More than 5"] },
     { id: "ingresos", type: "single", q: "Approximately how much does your business bill per month?", options: ["Less than $500 USD","$500 – $1,000 USD","$1,000 – $5,000 USD","$5,000 – $10,000 USD","More than $10,000 USD"] },
     { id: "clientes", type: "single", q: "How do your clients currently find you?", options: ["Referrals / word of mouth","Organic social media","Paid advertising (ads)","Physical location","Combination of several"] },
@@ -822,7 +822,7 @@ async function submitQuiz() {
     });
 
     const data = await response.json();
-    const text = data.content?.map(b => b.text || '').join('') || '';
+    const text = data.text || '';
 
     // Send data to Make webhook
     const level = text.toLowerCase().includes('alto') || text.toLowerCase().includes('high') ? (lang === 'es' ? 'Alto' : 'High') :
