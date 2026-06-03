@@ -862,9 +862,16 @@ async function submitQuiz() {
 
     renderResult(text);
   } catch (e) {
-    renderResult(lang === 'es'
-      ? "Hubo un error al generar tu diagnóstico. Por favor intenta de nuevo."
-      : "There was an error generating your diagnosis. Please try again.");
+    document.getElementById('screen').innerHTML = `
+      <div class="loading">
+        <div style="font-size:32px;margin-bottom:16px">⚠️</div>
+        <h2>${lang === 'es' ? 'Algo salió mal' : 'Something went wrong'}</h2>
+        <p style="margin-bottom:24px;color:#E8E0D0">${lang === 'es' ? 'Error: ' + e.message : 'Error: ' + e.message}</p>
+        <button class="btn-start" onclick="restartQuiz()" style="max-width:300px;margin:0 auto">
+          ${lang === 'es' ? 'Intentar de nuevo' : 'Try again'}
+        </button>
+      </div>
+    `;
   }
 }
 
