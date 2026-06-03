@@ -810,8 +810,44 @@ function goNext() {
     renderQuestion();
     window.scrollTo(0, 0);
   } else {
-    submitQuiz();
+    renderContact();
   }
+}
+
+function renderContact() {
+  document.getElementById('screen').innerHTML = `
+    <div class="question-card">
+      <div class="q-number">${lang === 'es' ? 'ÚLTIMO PASO' : 'LAST STEP'}</div>
+      <div class="q-text">${lang === 'es' ? '¿A dónde enviamos tu diagnóstico?' : 'Where should we send your diagnosis?'}</div>
+      <div class="q-hint">${lang === 'es' ? 'Lo recibirás por WhatsApp o email' : 'You will receive it via WhatsApp or email'}</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+        <div>
+          <label style="font-size:12px;color:#E8E0D0;display:block;margin-bottom:6px">${lang === 'es' ? 'Nombre completo' : 'Full name'}</label>
+          <input class="text-input" type="text" id="contact-nombre" placeholder="${lang === 'es' ? 'Tu nombre' : 'Your name'}" value="${answers['nombre'] || ''}">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#E8E0D0;display:block;margin-bottom:6px">Email</label>
+          <input class="text-input" type="email" id="contact-email" placeholder="${lang === 'es' ? 'tu@email.com' : 'your@email.com'}" oninput="updateContactNext()">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#E8E0D0;display:block;margin-bottom:6px">${lang === 'es' ? 'WhatsApp (con código de país)' : 'WhatsApp (with country code)'}</label>
+          <input class="text-input" type="tel" id="contact-phone" placeholder="+57 300 000 0000" oninput="updateContactNext()">
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="goBack()">${t('back')}</button>
+        <button class="btn-next" id="btn-contact-next" onclick="submitQuiz()" disabled>${t('submit')}</button>
+      </div>
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function updateContactNext() {
+  const email = document.getElementById('contact-email')?.value || '';
+  const phone = document.getElementById('contact-phone')?.value || '';
+  const btn = document.getElementById('btn-contact-next');
+  if (btn) btn.disabled = !(email || phone);
 }
 
 function goBack() {
@@ -820,6 +856,11 @@ function goBack() {
 }
 
 async function submitQuiz() {
+  // Capture contact info
+  answers['email'] = document.getElementById('contact-email')?.value || '';
+  answers['telefono'] = document.getElementById('contact-phone')?.value || '';
+  answers['nombre'] = document.getElementById('contact-nombre')?.value || answers['nombre'] || '';
+
   document.getElementById('screen').innerHTML = `
     <div class="loading">
       <div class="loading-icon"></div>
@@ -862,6 +903,8 @@ async function submitQuiz() {
           fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
           idioma: lang.toUpperCase(),
           nombre: answers['nombre'] || '',
+          email: answers['email'] || '',
+          telefono: answers['telefono'] || '',
           sector: answers['sector'] || '',
           tipo_venta: answers['tipo_venta'] || '',
           equipo: answers['equipo'] || '',
@@ -878,7 +921,8 @@ async function submitQuiz() {
           pauta: answers['pauta'] || '',
           retos: answers['reto'] || '',
           objetivo: answers['objetivo'] || '',
-          nivel: level
+          nivel: level,
+          diagnostico: text.substring(0, 1000)
         })
       });
     } catch(e) {
