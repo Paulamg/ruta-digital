@@ -4,8 +4,9 @@
 
 [functions]
   node_bundler = "esbuild"
-  # Timeout extendido para la función de generación (requiere plan Pro en Netlify)
-  # En plan gratis el límite es 10s — considera usar Background Functions si generas en >10s
+
+[functions."diagnose"]
+  timeout = 30
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -14,7 +15,13 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
 
-# Redirigir /estrategia al formulario
+# API shortcut (fase gratuita)
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/:splat"
+  status = 200
+
+# Formulario fase paga
 [[redirects]]
   from   = "/estrategia"
   to     = "/formulario.html"
