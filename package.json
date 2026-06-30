@@ -1,0 +1,14 @@
+{
+  "name": "estrategia-digital-bestia-grow",
+  "version": "1.0.0",
+  "description": "Producto digital $30 — Estrategia Digital Personalizada de Ruta Digital",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^140.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

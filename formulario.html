@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu Estrategia Digital Personalizada — Ruta Digital</title>
+  <style>
+    :root {
+      --verde: #1a9e6b;
+      --verde-oscuro: #127a51;
+      --gris: #f5f5f5;
+      --texto: #1a1a1a;
+      --borde: #ddd;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--gris);
+      color: var(--texto);
+      min-height: 100vh;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid var(--verde);
+      padding: 18px 24px;
+      text-align: center;
+    }
+
+    header img { height: 40px; }
+    header h1 { font-size: 1.1rem; color: var(--verde-oscuro); margin-top: 6px; }
+
+    .container {
+      max-width: 680px;
+      margin: 40px auto;
+      padding: 0 20px 60px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--verde);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .campo {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    label span.opcional {
+      font-weight: 400;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--borde);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: white;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--verde);
+    }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    .hint {
+      font-size: 0.82rem;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* Upload de captura */
+    .upload-area {
+      border: 2px dashed var(--borde);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .upload-area:hover, .upload-area.activo {
+      border-color: var(--verde);
+      background: #f0faf5;
+    }
+
+    .upload-area input { display: none; }
+
+    .upload-area .icono { font-size: 2rem; margin-bottom: 8px; }
+
+    .upload-area p { font-size: 0.9rem; color: #666; }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Botón submit */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--verde);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-submit:hover { background: var(--verde-oscuro); }
+    .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* Estados */
+    #estado-token {
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    #estado-token.error {
+      background: #fff0f0;
+      border: 1px solid #f5c6c6;
+      color: #c0392b;
+    }
+
+    #estado-token.cargando {
+      background: #fff9e6;
+      border: 1px solid #f5e6a3;
+      color: #7d6608;
+      display: block;
+    }
+
+    #pantalla-exito {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    #pantalla-exito .check { font-size: 4rem; margin-bottom: 16px; }
+    #pantalla-exito h2 { font-size: 1.5rem; color: var(--verde-oscuro); margin-bottom: 12px; }
+    #pantalla-exito p { color: #555; line-height: 1.6; }
+
+    #pantalla-error-token {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    #pantalla-error-token h2 { color: #c0392b; margin-bottom: 12px; }
+    #pantalla-error-token p { color: #555; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-campo {
+      color: #c0392b;
+      font-size: 0.82rem;
+      margin-top: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <!-- Reemplaza con tu logo real -->
+  <div style="font-size:1.3rem;font-weight:800;color:var(--verde);">Ruta Digital</div>
+  <h1>Estrategia Digital Personalizada</h1>
+</header>
+
+<div class="container">
+
+  <!-- Estado de validación del token -->
+  <div id="estado-token" class="cargando">⏳ Verificando tu acceso...</div>
+
+  <!-- Pantalla error token -->
+  <div id="pantalla-error-token" class="card">
+    <h2 style="color:#c0392b;">Acceso no válido</h2>
+    <p style="margin-top:12px;">No pudimos verificar tu pago. Si ya compraste, escríbenos a <strong>hola@rutadigital.com</strong> con el número de tu orden de Hotmart.</p>
+  </div>
+
+  <!-- Formulario principal -->
+  <div id="formulario-principal" style="display:none;">
+
+    <div class="card" style="margin-bottom:28px;background:linear-gradient(135deg,#f0faf5,#e8f5ef);border-left:4px solid var(--verde);">
+      <p style="font-size:0.95rem;line-height:1.7;color:#2d5a46;">
+        <strong>¡Listo! Tu pago fue confirmado.</strong><br>
+        Responde estas preguntas con calma — entre más detalle, mejor será tu estrategia. Recibirás el documento en tu correo en los próximos 5 minutos.
+      </p>
+    </div>
+
+    <form id="forma" novalidate>
+
+      <!-- BLOQUE 1: Tu negocio -->
+      <div class="card">
+        <h2>📦 Tu negocio</h2>
+
+        <div class="campo">
+          <label for="descripcion_negocio">¿Qué vendes exactamente?</label>
+          <textarea id="descripcion_negocio" name="descripcion_negocio" placeholder="Ej: Soy coach de productividad para emprendedores latinoamericanos. Ofrezco mentoría 1:1 y un curso online de 8 semanas..."></textarea>
+          <div class="error-campo" id="err-descripcion">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="cliente_ideal">¿A quién le vendes?</label>
+          <textarea id="cliente_ideal" name="cliente_ideal" placeholder="Ej: Emprendedores entre 28 y 45 años que tienen un negocio funcionando pero sienten que no avanzan porque se pierden en el día a día..."></textarea>
+          <div class="error-campo" id="err-cliente">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="precio">¿Cuál es tu precio o rango de precios?</label>
+          <input type="text" id="precio" name="precio" placeholder="Ej: $97 USD el curso, $500 la mentoría" />
+          <div class="error-campo" id="err-precio">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="pais">¿En qué país o países operas?</label>
+          <input type="text" id="pais" name="pais" placeholder="Ej: Colombia, México, toda Latinoamérica" />
+          <div class="error-campo" id="err-pais">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="ingresos">¿En qué rango están tus ingresos mensuales actuales con este negocio?</label>
+          <select id="ingresos" name="ingresos">
+            <option value="">— Selecciona —</option>
+            <option value="menos-500">Menos de $500 USD/mes</option>
+            <option value="500-2000">$500 – $2,000 USD/mes</option>
+            <option value="2000-10000">$2,000 – $10,000 USD/mes</option>
+            <option value="mas-10000">Más de $10,000 USD/mes</option>
+          </select>
+          <div class="hint">Esta info es confidencial y nos ayuda a calibrar el nivel de la estrategia.</div>
+          <div class="error-campo" id="err-ingresos">Selecciona una opción.</div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: Presencia actual -->
+      <div class="card">
+        <h2>🌐 Tu presencia online</h2>
+
+        <div class="campo">
+          <label for="url_web">URL de tu sitio web <span class="opcional">(opcional)</span></label>
+          <input type="url" id="url_web" name="url_web" placeholder="https://tunegocio.com" />
+          <div class="hint">Analizaremos tu sitio automáticamente.</div>
+        </div>
+
+        <div class="campo">
+          <label>Captura de pantalla de tu perfil principal en redes <span class="opcional">(opcional)</span></label>
+          <div class="upload-area" id="drop-zone" onclick="document.getElementById('archivo_captura').click()">
+            <div class="icono">📸</div>
+            <p>Haz clic o arrastra aquí una captura de tu perfil de Instagram, Facebook, TikTok o LinkedIn</p>
+            <p style="font-size:0.78rem;color:#aaa;margin-top:6px;">JPG, PNG o WEBP — máx. 5MB</p>
+            <input type="file" id="archivo_captura" accept="image/jpeg,image/png,image/webp" />
+          </div>
+          <img id="preview-captura" class="preview-img" alt="Vista previa" />
+        </div>
+
+        <div class="campo">
+          <label for="url_otra_red">URL de otro canal que uses <span class="opcional">(opcional)</span></label>
+          <input type="url" id="url_otra_red" name="url_otra_red" placeholder="https://facebook.com/tunegocio" />
+        </div>
+      </div>
+
+      <!-- BLOQUE 3: Tu situación -->
+      <div class="card">
+        <h2>🎯 Tu situación actual</h2>
+
+        <div class="campo">
+          <label for="frustracion">¿Cuál es tu mayor frustración digital ahora mismo?</label>
+          <textarea id="frustracion" name="frustracion" placeholder="Ej: Tengo 3,000 seguidores pero casi nadie me compra. Publico contenido pero no sé si está funcionando..."></textarea>
+          <div class="error-campo" id="err-frustracion">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="intentos_previos">¿Qué has intentado antes para conseguir clientes online?</label>
+          <textarea id="intentos_previos" name="intentos_previos" placeholder="Ej: Hice anuncios en Facebook durante 2 meses, gasté $300 y conseguí 2 clientes. También probé publicar en Instagram todos los días pero me cansé..."></textarea>
+          <div class="error-campo" id="err-intentos">Este campo es requerido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="competidor">¿Quién consideras tu competidor principal?</label>
+          <input type="text" id="competidor" name="competidor" placeholder="Nombre, marca o URL de tu competencia más directa" />
+          <div class="error-campo" id="err-competidor">Este campo es requerido.</div>
+        </div>
+      </div>
+
+      <div id="mensaje-error-envio" style="display:none;background:#fff0f0;border:1px solid #f5c6c6;color:#c0392b;padding:14px 18px;border-radius:8px;margin-bottom:16px;font-size:0.9rem;"></div>
+
+      <button type="submit" class="btn-submit" id="btn-enviar">
+        Generar mi estrategia →
+      </button>
+    </form>
+
+  </div>
+
+  <!-- Pantalla de éxito -->
+  <div id="pantalla-exito" class="card">
+    <div class="check">✅</div>
+    <h2>¡Tu estrategia está en camino!</h2>
+    <p>Estamos analizando tu negocio y generando tu documento personalizado.<br><br>
+    Revisa tu correo en los próximos <strong>5 minutos</strong>. Si no llega, revisa la carpeta de spam.</p>
+  </div>
+
+</div>
+
+<script>
+  // ─── Configuración ───────────────────────────────────────────
+  const FUNCION_VALIDAR  = '/.netlify/functions/validar-pago';
+  const FUNCION_GENERAR  = '/.netlify/functions/generar-estrategia';
+
+  // ─── Variables globales ──────────────────────────────────────
+  let tokenValido = null;
+  let emailCliente = null;
+  let imagenBase64 = null;
+
+  // ─── Al cargar: validar token de la URL ─────────────────────
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+
+    const elEstado    = document.getElementById('estado-token');
+    const elFormulario = document.getElementById('formulario-principal');
+    const elErrorToken = document.getElementById('pantalla-error-token');
+
+    if (!token) {
+      elEstado.style.display = 'none';
+      elErrorToken.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res  = await fetch(`${FUNCION_VALIDAR}?token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+
+      elEstado.style.display = 'none';
+
+      if (res.ok && data.valid) {
+        tokenValido  = token;
+        emailCliente = data.email;
+        elFormulario.style.display = 'block';
+      } else {
+        elErrorToken.style.display = 'block';
+      }
+    } catch (e) {
+      elEstado.style.display = 'none';
+      elErrorToken.style.display = 'block';
+    }
+  });
+
+  // ─── Upload de imagen ────────────────────────────────────────
+  const inputArchivo = document.getElementById('archivo_captura');
+  const dropZone     = document.getElementById('drop-zone');
+  const previewImg   = document.getElementById('preview-captura');
+
+  inputArchivo.addEventListener('change', () => {
+    const file = inputArchivo.files[0];
+    if (file) procesarImagen(file);
+  });
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('activo'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('activo'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('activo');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) procesarImagen(file);
+  });
+
+  function procesarImagen(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no puede superar 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      imagenBase64 = e.target.result; // data:image/...;base64,...
+      previewImg.src = imagenBase64;
+      previewImg.style.display = 'block';
+      dropZone.querySelector('p').textContent = '✓ Imagen cargada';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ─── Validación del formulario ───────────────────────────────
+  function validarCampo(id, errorId) {
+    const val = document.getElementById(id).value.trim();
+    const err = document.getElementById(errorId);
+    if (!val) { err.style.display = 'block'; return false; }
+    err.style.display = 'none';
+    return true;
+  }
+
+  function validarFormulario() {
+    const checks = [
+      validarCampo('descripcion_negocio', 'err-descripcion'),
+      validarCampo('cliente_ideal',        'err-cliente'),
+      validarCampo('precio',               'err-precio'),
+      validarCampo('pais',                 'err-pais'),
+      validarCampo('ingresos',             'err-ingresos'),
+      validarCampo('frustracion',          'err-frustracion'),
+      validarCampo('intentos_previos',     'err-intentos'),
+      validarCampo('competidor',           'err-competidor'),
+    ];
+    return checks.every(Boolean);
+  }
+
+  // ─── Submit ──────────────────────────────────────────────────
+  document.getElementById('forma').addEventListener('submit', async e => {
+    e.preventDefault();
+
+    if (!validarFormulario()) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const btn = document.getElementById('btn-enviar');
+    const mensajeError = document.getElementById('mensaje-error-envio');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generando tu estrategia...';
+    mensajeError.style.display = 'none';
+
+    const payload = {
+      token:               tokenValido,
+      email:               emailCliente,
+      descripcion_negocio: document.getElementById('descripcion_negocio').value.trim(),
+      cliente_ideal:       document.getElementById('cliente_ideal').value.trim(),
+      precio:              document.getElementById('precio').value.trim(),
+      pais:                document.getElementById('pais').value.trim(),
+      ingresos:            document.getElementById('ingresos').value,
+      url_web:             document.getElementById('url_web').value.trim(),
+      url_otra_red:        document.getElementById('url_otra_red').value.trim(),
+      frustracion:         document.getElementById('frustracion').value.trim(),
+      intentos_previos:    document.getElementById('intentos_previos').value.trim(),
+      competidor:          document.getElementById('competidor').value.trim(),
+      captura_perfil:      imagenBase64 || null,
+    };
+
+    try {
+      const res = await fetch(FUNCION_GENERAR, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        document.getElementById('formulario-principal').style.display = 'none';
+        document.getElementById('pantalla-exito').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        mensajeError.textContent = data.error || 'Ocurrió un error. Por favor intenta de nuevo.';
+        mensajeError.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = 'Generar mi estrategia →';
+      }
+    } catch (err) {
+      mensajeError.textContent = 'No pudimos conectar con el servidor. Verifica tu conexión e intenta de nuevo.';
+      mensajeError.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = 'Generar mi estrategia →';
+    }
+  });
+</script>
+
+</body>
+</html>

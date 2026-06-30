@@ -1,0 +1,21 @@
+[build]
+  functions = "netlify/functions"
+  publish   = "."
+
+[functions]
+  node_bundler = "esbuild"
+  # Timeout extendido para la función de generación (requiere plan Pro en Netlify)
+  # En plan gratis el límite es 10s — considera usar Background Functions si generas en >10s
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin  = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# Redirigir /estrategia al formulario
+[[redirects]]
+  from   = "/estrategia"
+  to     = "/formulario.html"
+  status = 200
