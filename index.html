@@ -510,6 +510,83 @@
   }
   .btn-cta:hover { transform: translateY(-1px); }
 
+  /* UPSELL $30 */
+  .upsell-block {
+    background: #111111;
+    border: 1px solid rgba(255,77,28,0.35);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .upsell-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .upsell-block h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #F5F0E8;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .upsell-block > p {
+    font-size: 14px;
+    color: #BBAA99;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .upsell-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+    text-align: left;
+    background: rgba(255,77,28,0.06);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .upsell-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #E8E0D0;
+    line-height: 1.4;
+  }
+  .upsell-item .check { color: var(--accent); flex-shrink: 0; }
+  .upsell-price { margin-bottom: 16px; }
+  .upsell-price .amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .upsell-price .label { font-size: 13px; color: #BBAA99; margin-left: 4px; }
+  .btn-upsell {
+    display: block;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-upsell:hover { background: #e03e10; transform: translateY(-1px); }
+  .upsell-guarantee { font-size: 12px; color: #555; margin-top: 10px; }
+
   /* TRIANGLE DISPLAY */
   .triangle-wrap {
     background: var(--surface);
@@ -1063,7 +1140,33 @@ function renderResult(text) {
       </div>
 
       <div class="result-body">${formatted}</div>
-      <button class="btn-download" onclick="downloadPDF()">
+
+      <div class="upsell-block">
+        <p class="upsell-eyebrow">${lang === 'es' ? '✦ Siguiente paso' : '✦ Next step'}</p>
+        <h3>${lang === 'es'
+          ? 'Tu diagnóstico reveló las brechas. Ahora necesitas el plan.'
+          : 'Your diagnosis revealed the gaps. Now you need the plan.'}</h3>
+        <p>${lang === 'es'
+          ? 'Recibe una Estrategia Digital Personalizada: canales, mensajes, ángulos de venta y un plan de acción de 30 días — creado con IA específicamente para tu negocio.'
+          : 'Get a Personalized Digital Strategy: channels, messaging, sales angles, and a 30-day action plan — created with AI specifically for your business.'}</p>
+        <div class="upsell-items">
+          <div class="upsell-item"><span class="check">→</span><span>${lang === 'es' ? 'Perfil detallado de tu cliente ideal' : 'Detailed ideal client profile'}</span></div>
+          <div class="upsell-item"><span class="check">→</span><span>${lang === 'es' ? 'Canales prioritarios para tu tipo de negocio' : 'Priority channels for your business type'}</span></div>
+          <div class="upsell-item"><span class="check">→</span><span>${lang === 'es' ? 'Ángulos de venta que conectan con tu audiencia' : 'Sales angles that connect with your audience'}</span></div>
+          <div class="upsell-item"><span class="check">→</span><span>${lang === 'es' ? 'Plan de acción semana a semana — 30 días' : 'Week-by-week action plan — 30 days'}</span></div>
+          <div class="upsell-item"><span class="check">→</span><span>${lang === 'es' ? 'Entregado en tu correo en menos de 5 minutos' : 'Delivered to your email in under 5 minutes'}</span></div>
+        </div>
+        <div class="upsell-price">
+          <span class="amount">$30</span>
+          <span class="label">USD</span>
+        </div>
+        <a href="https://pay.hotmart.com/S106435930W" target="_blank" class="btn-upsell">
+          ${lang === 'es' ? 'Quiero mi estrategia →' : 'I want my strategy →'}
+        </a>
+        <p class="upsell-guarantee">${lang === 'es' ? '🔒 Pago seguro vía Hotmart · Entrega inmediata por email' : '🔒 Secure payment via Hotmart · Immediate email delivery'}</p>
+      </div>
+
+      <button class="btn-download" onclick="downloadPDF()" style="margin-top:16px;">
         📄 ${lang === 'es' ? 'Descargar diagnóstico en PDF' : 'Download diagnosis as PDF'}
       </button>
       <button class="btn-restart" onclick="restartQuiz()">${t('restart')}</button>
